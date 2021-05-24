@@ -94,3 +94,11 @@ names(resultados1)<-c("real","prediccion")
 ```{r}
 confusionMatrix(resultados1$real,resultados1$prediccion)
 ```
+
+##Clustering jerárquico
+```{r}
+d <- dist(test$Edadm, method = "euclidean")
+hc <- hclust(d, method = "average")
+plot(hc, cex = 0.6, hang = -1)
+rect.hclust(hc, k = 9, border = 2:10)
+```
