@@ -1,0 +1,96 @@
+---
+title: "Proyecto"
+author: "Daniela Batz, Alexa Bravo, Diana Sosa"
+date: "20/5/2021"
+output: html_document
+---
+
+```{r}
+# importación de librerias
+library(foreign)
+library(ggplot2)
+library(haven)
+library(dplyr) #Para usar select
+library(fpc) #Para la gráficas 
+library(cluster) #Para la siluetas
+library(e1071)#para cmeans
+library(mclust) #mixtures of gaussians
+library(NbClust) #Para determinar el número de clusters óptimo
+library(factoextra) #Para hacer gráficos bonitos de clustering
+library(ModelMetrics)
+
+#Datos
+myDatadefunciones <- read.csv("DefuncionesFetales.csv")
+```
+
+```{r}
+summary(myDatadefunciones)
+```
+```{r}
+porcentaje<-0.7
+datos<-myDatadefunciones
+set.seed(123)
+
+corte <- sample(nrow(datos),nrow(datos)*porcentaje)
+
+#Conjuntos de entrenamiento y prueba
+train<-datos[corte,]
+test<-datos[-corte,]
+```
+
+```{r}
+#Datos de entrenamiento
+head(train)
+```
+
+```{r}
+#Datos de prueba
+head(test)
+```
+#Regresión Lineal Simple 
+```{r}
+fitLMET<-lm(Tipar~Edadm, data = train)
+```
+
+```{r}
+summary(fitLMET)
+```
+```{r}
+ggplot(data = train, mapping = aes(x = Tipar, y = Edadm)) +
+geom_point(color = "firebrick", size = 2) +
+geom_smooth(method = "lm", se = TRUE, color = "black") +
+labs(title = "Edad de la Madre ~ Tipo de Parto", x = "Tipo de Parto", y = "Edad de la madre")
+```
+
+```{r}
+predL<-predict(fitLMET, newdata = test)
+```
+
+```{r}
+resultados<-data.frame(test$Tipar,predL)
+summary(resultados)
+```
+
+```{r}
+residuales <- test$Tipar-predL
+summary(residuales)
+```
+
+```{r}
+par(mfrow = c(2,2))
+plot(fitLMET)
+```
+```{r}
+fitLMSE<-lm(semges~Tipar, data = train)
+summary(fitLMSE)
+```
+
+```{r}
+predMSE<-predict(fitLMSE,newdata = test)
+resultados1<-data.frame(test$Tipar,round(predMSE,0))
+names(resultados1)<-c("real","prediccion")
+```
+
+```{r}
+confusionMatrix(resultados1$real,resultados1$prediccion)
+```
